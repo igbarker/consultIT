@@ -167,7 +167,7 @@ export default function QuestionFlow({ questions, onComplete }: QuestionFlowProp
               className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
             >
               <HelpCircle className="w-4 h-4" />
-              <span>Why we're asking this</span>
+              <span>Why we&apos;re asking this</span>
             </button>
             
             {/* Context Explanation */}

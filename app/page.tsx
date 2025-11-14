@@ -81,7 +81,7 @@ export default function HomePage() {
                 </span>
               </span>
             </div>
-            <div className="-mt-6">we'll help you solve it.</div>
+            <div className="-mt-6">we&apos;ll help you solve it.</div>
           </h2>
 
           <p className="text-sm text-slate-600 text-center mb-8 mx-auto whitespace-nowrap">
@@ -102,7 +102,7 @@ export default function HomePage() {
                 onChange={(e) => setInput(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                placeholder="Share as little or as much as you'd like - we'll take it from here."
+                placeholder="Share as little or as much as you&apos;d like - we&apos;ll take it from here."
                 className="w-full pt-4 px-6 pb-6 pr-24 text-base resize-none focus:outline-none min-h-[180px] max-h-[400px] text-slate-900 placeholder:text-slate-400 bg-transparent"
                 rows={4}
               />
@@ -144,7 +144,7 @@ export default function HomePage() {
               className="group w-full bg-gradient-to-r from-blue-600 to-violet-600 text-white py-4 px-8 rounded-xl text-base font-semibold hover:from-blue-700 hover:to-violet-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 disabled:shadow-none relative overflow-hidden"
             >
               <span className="relative z-10">
-                Let's Find a Solution
+                Let&apos;s Find a Solution
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-violet-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>

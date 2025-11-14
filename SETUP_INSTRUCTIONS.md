@@ -11,11 +11,32 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 
 # OpenAI (you'll need to get your own key)
 OPENAI_API_KEY=your-key-here
-
-# Clerk (we'll set this up when ready for auth)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
 ```
+
+## Setting Up Supabase Authentication
+
+1. **Go to your Supabase Dashboard:** https://supabase.com/dashboard
+2. **Select your project** (or create one if you haven't)
+3. **Go to Authentication → Providers**
+4. **Enable Email Provider:**
+   - Toggle "Enable Email provider" ON
+   - Configure email templates if desired (optional)
+5. **Enable Google OAuth (Optional):**
+   - Toggle "Google" ON
+   - You'll need to create OAuth credentials in Google Cloud Console
+   - Add Client ID and Client Secret
+   - Add redirect URL: `http://localhost:3000/auth/callback` (for dev)
+6. **Enable Microsoft OAuth (Optional):**
+   - Toggle "Azure" ON
+   - Create app in Azure Portal
+   - Add Client ID and Client Secret
+   - Add redirect URL: `http://localhost:3000/auth/callback` (for dev)
+7. **Configure Redirect URLs:**
+   - Go to Authentication → URL Configuration
+   - Add Site URL: `http://localhost:3000` (for dev)
+   - Add Redirect URLs: `http://localhost:3000/auth/callback`
+
+**Note:** For production, you'll need to update these URLs to your production domain.
 
 ## Getting OpenAI API Key
 
