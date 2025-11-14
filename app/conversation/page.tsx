@@ -96,7 +96,7 @@ export default function ConversationPage() {
   };
 
   if (stage === 'generating-questions') {
-    return <LoadingScreen message="Analyzing your challenge and generating personalized questions..." />;
+    return <LoadingScreen message="Ok, we've got a few questions to ask to ensure we are well aligned on your needs" />;
   }
 
   if (stage === 'problem-questions') {
