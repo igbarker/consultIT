@@ -58,7 +58,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 p-4 relative overflow-hidden">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 p-4 pb-24 relative overflow-hidden">
       {/* Ambient Background Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-200/50 to-transparent"></div>
@@ -153,10 +153,11 @@ export default function HomePage() {
       </div>
 
       {/* Sign In Link */}
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+      <div className="absolute bottom-8 left-0 right-0 flex justify-center z-20 pointer-events-auto">
         <button
+          type="button"
           onClick={() => router.push('/signin')}
-          className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+          className="text-sm text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
         >
           Working on a current project? <span className="font-medium underline">Sign in here</span>
         </button>
