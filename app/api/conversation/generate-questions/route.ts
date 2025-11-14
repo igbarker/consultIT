@@ -182,40 +182,47 @@ function generateMockQuestions(problem: string): any[] {
     ];
   }
 
-  // Generic fallback for any problem
+  // Generic fallback for any problem - make it more consultative
   return [
     {
       id: "problem_scope",
-      question: "Help me understand the scope of this challenge. How long has this been an issue?",
-      context: "Knowing the history helps us gauge urgency and understand what's changed.",
+      question: `Help me understand the scope of this challenge. You mentioned "${problem.substring(0, 50)}..." - how long has this been an issue, and is it getting worse or staying the same?`,
+      context: "Understanding the timeline and trajectory helps us gauge urgency and identify what might have changed recently.",
       type: "text",
       required: true
     },
     {
-      id: "impact",
-      question: "What's the impact on your business? Revenue, costs, team productivity?",
-      context: "Business impact helps us prioritize features and justify investments.",
+      id: "business_impact",
+      question: "When this problem occurs, what's the actual cost to your business? Are we talking about lost revenue, increased costs, team frustration, or customer complaints?",
+      context: "Quantifying the business impact helps us prioritize features and justify the investment in a solution.",
       type: "text",
       required: true
     },
     {
-      id: "current_state",
-      question: "What are you doing today to address this, and why isn't it working?",
-      context: "Understanding current approaches helps us avoid similar solutions.",
+      id: "current_approach",
+      question: "What are you doing today to address this? Walk me through your current process and help me understand where it's breaking down.",
+      context: "Knowing what you've already tried helps us avoid recommending similar solutions that won't solve the root cause.",
       type: "text",
       required: true
     },
     {
-      id: "ideal_solution",
-      question: "If you could wave a magic wand, what would be different in 6 months?",
-      context: "Your ideal outcome helps us find solutions that match your vision.",
+      id: "success_vision",
+      question: "If we solve this perfectly, what would be different in 6 months? Paint me a picture of what success looks like.",
+      context: "Your vision of success helps us match you with solutions that align with your goals, not just check boxes.",
       type: "text",
       required: true
+    },
+    {
+      id: "constraints",
+      question: "What constraints are we working with? Budget, timeline, technical limitations, or team capabilities?",
+      context: "Understanding constraints upfront helps us recommend realistic solutions that you can actually implement.",
+      type: "text",
+      required: false
     },
     {
       id: "must_haves",
-      question: "Any must-have features or absolute deal-breakers?",
-      context: "Critical requirements help us filter vendors effectively.",
+      question: "Are there any absolute must-haves or deal-breakers? Features or capabilities that would make a solution a non-starter?",
+      context: "Critical requirements help us filter vendors effectively and save you time evaluating options that won't work.",
       type: "text",
       required: false
     },
