@@ -78,6 +78,9 @@ export default function ConversationPage() {
     if (!savedStage || savedStage === 'generating-questions') {
       if (savedProblem) {
         generateQuestions(savedProblem);
+      } else {
+        // No problem saved - redirect to home
+        window.location.href = '/';
       }
     } else {
       // Restore the stage we were at
@@ -94,7 +97,7 @@ export default function ConversationPage() {
       }
     }
 
-    // Listen for auth state changes (for OAuth redirects)
+    // Listen for auth state changes (for OAuth redirects and email confirmation)
     const supabase = createClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
@@ -120,11 +123,33 @@ export default function ConversationPage() {
     };
   }, []); // Remove stage dependency to prevent re-running
 
+  // Auto-proceed from signup if authenticated
+  useEffect(() => {
+    if (stage === 'signup' && isAuthenticated && !checkingAuth) {
+      handleSignupComplete();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, isAuthenticated, checkingAuth]);
+
   const checkAuth = async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    setIsAuthenticated(!!user);
+    const isAuth = !!user;
+    setIsAuthenticated(isAuth);
     setCheckingAuth(false);
+    
+    // If user just confirmed email and we were at signup stage, proceed
+    if (isAuth) {
+      const savedStage = sessionStorage.getItem('conversationStage') as Stage | null;
+      if (savedStage === 'signup') {
+        // Load firmographic questions and proceed
+        const response = await fetch('/api/conversation/firmographic-questions');
+        const data = await response.json();
+        setFirmographicQuestions(data.questions);
+        setStage('firmographic-questions');
+        sessionStorage.setItem('conversationStage', 'firmographic-questions');
+      }
+    }
   };
 
   const generateQuestions = async (problem: string) => {
@@ -215,6 +240,11 @@ export default function ConversationPage() {
   if (stage === 'signup') {
     if (checkingAuth) {
       return <LoadingScreen message="Verifying authentication..." />;
+    }
+
+    // If authenticated, show loading while proceeding (will auto-advance via useEffect)
+    if (isAuthenticated) {
+      return <LoadingScreen message="Great! Taking you to the next step..." />;
     }
 
     return (

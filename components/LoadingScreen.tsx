@@ -27,9 +27,16 @@ const FUN_FACTS = [
 
 export default function LoadingScreen({ message }: LoadingScreenProps) {
   const [messageIndex, setMessageIndex] = useState(0);
-  const [factIndex, setFactIndex] = useState(() => Math.floor(Math.random() * FUN_FACTS.length));
+  const [factIndex, setFactIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const messages = message ? [message] : DEFAULT_MESSAGES;
+
+  // Only randomize after mount to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+    setFactIndex(Math.floor(Math.random() * FUN_FACTS.length));
+  }, []);
 
   useEffect(() => {
     if (message) return; // Don't rotate if custom message provided
