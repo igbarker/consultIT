@@ -234,6 +234,10 @@ export default function ConversationPage() {
   }
 
   if (stage === 'problem-questions') {
+    // Ensure questions are loaded before showing QuestionFlow
+    if (!problemQuestions || problemQuestions.length === 0) {
+      return <LoadingScreen message="Loading questions..." />;
+    }
     return <QuestionFlow questions={problemQuestions} onComplete={handleProblemQuestionsComplete} />;
   }
 
@@ -267,7 +271,11 @@ export default function ConversationPage() {
             </p>
           </div>
         </div>
-        <QuestionFlow questions={firmographicQuestions} onComplete={handleFirmographicComplete} />
+        {firmographicQuestions && firmographicQuestions.length > 0 ? (
+          <QuestionFlow questions={firmographicQuestions} onComplete={handleFirmographicComplete} />
+        ) : (
+          <LoadingScreen message="Loading questions..." />
+        )}
       </div>
     );
   }
