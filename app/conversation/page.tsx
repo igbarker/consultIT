@@ -37,12 +37,62 @@ export default function ConversationPage() {
     // Check auth status
     checkAuth();
 
-    // Get initial problem from sessionStorage
-    const problem = sessionStorage.getItem('initialProblem') || '';
-    setInitialProblem(problem);
+    // Restore state from sessionStorage
+    const savedProblem = sessionStorage.getItem('initialProblem') || '';
+    const savedStage = sessionStorage.getItem('conversationStage') as Stage | null;
+    const savedProblemAnswers = sessionStorage.getItem('problemAnswers');
+    const savedFirmographicAnswers = sessionStorage.getItem('firmographicAnswers');
+    const savedProblemQuestions = sessionStorage.getItem('problemQuestions');
 
-    // Generate AI questions
-    generateQuestions(problem);
+    if (savedProblem) {
+      setInitialProblem(savedProblem);
+    }
+
+    // Restore answers if they exist
+    if (savedProblemAnswers) {
+      try {
+        setProblemAnswers(JSON.parse(savedProblemAnswers));
+      } catch (e) {
+        console.error('Error parsing problem answers:', e);
+      }
+    }
+
+    if (savedFirmographicAnswers) {
+      try {
+        setFirmographicAnswers(JSON.parse(savedFirmographicAnswers));
+      } catch (e) {
+        console.error('Error parsing firmographic answers:', e);
+      }
+    }
+
+    // Restore questions if they exist
+    if (savedProblemQuestions) {
+      try {
+        setProblemQuestions(JSON.parse(savedProblemQuestions));
+      } catch (e) {
+        console.error('Error parsing problem questions:', e);
+      }
+    }
+
+    // Only generate questions if we haven't started yet
+    if (!savedStage || savedStage === 'generating-questions') {
+      if (savedProblem) {
+        generateQuestions(savedProblem);
+      }
+    } else {
+      // Restore the stage we were at
+      setStage(savedStage);
+      
+      // If we're past signup, load firmographic questions
+      if (savedStage === 'firmographic-questions' || savedStage === 'generating-summary' || savedStage === 'summary') {
+        fetch('/api/conversation/firmographic-questions')
+          .then(res => res.json())
+          .then(data => {
+            setFirmographicQuestions(data.questions);
+          })
+          .catch(err => console.error('Error loading firmographic questions:', err));
+      }
+    }
 
     // Listen for auth state changes (for OAuth redirects)
     const supabase = createClient();
@@ -51,12 +101,14 @@ export default function ConversationPage() {
         setIsAuthenticated(true);
         setCheckingAuth(false);
         // If we're on signup stage and user just signed in, proceed
-        if (stage === 'signup') {
+        const currentStage = sessionStorage.getItem('conversationStage') as Stage | null;
+        if (currentStage === 'signup') {
           // Load firmographic questions
           const response = await fetch('/api/conversation/firmographic-questions');
           const data = await response.json();
           setFirmographicQuestions(data.questions);
           setStage('firmographic-questions');
+          sessionStorage.setItem('conversationStage', 'firmographic-questions');
         }
       } else if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
@@ -66,7 +118,7 @@ export default function ConversationPage() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [stage]);
+  }, []); // Remove stage dependency to prevent re-running
 
   const checkAuth = async () => {
     const supabase = createClient();
@@ -84,24 +136,30 @@ export default function ConversationPage() {
       });
 
       const data = await response.json();
-      setProblemQuestions(data.questions || []);
+      const questions = data.questions || [];
+      setProblemQuestions(questions);
+      sessionStorage.setItem('problemQuestions', JSON.stringify(questions));
       
       // Minimum 3 seconds on loading screen
       setTimeout(() => {
         setStage('problem-questions');
+        sessionStorage.setItem('conversationStage', 'problem-questions');
       }, 3000);
     } catch (error) {
       console.error('Error generating questions:', error);
       // Fallback to stage change after delay
       setTimeout(() => {
         setStage('problem-questions');
+        sessionStorage.setItem('conversationStage', 'problem-questions');
       }, 3000);
     }
   };
 
   const handleProblemQuestionsComplete = (answers: Record<string, string>) => {
     setProblemAnswers(answers);
+    sessionStorage.setItem('problemAnswers', JSON.stringify(answers));
     setStage('signup');
+    sessionStorage.setItem('conversationStage', 'signup');
   };
 
   const handleSignupComplete = async () => {
@@ -116,6 +174,7 @@ export default function ConversationPage() {
       const data = await response.json();
       setFirmographicQuestions(data.questions);
       setStage('firmographic-questions');
+      sessionStorage.setItem('conversationStage', 'firmographic-questions');
     } else {
       // Still waiting for auth (OAuth redirect)
       setCheckingAuth(true);
@@ -124,11 +183,14 @@ export default function ConversationPage() {
 
   const handleFirmographicComplete = (answers: Record<string, string>) => {
     setFirmographicAnswers(answers);
+    sessionStorage.setItem('firmographicAnswers', JSON.stringify(answers));
     setStage('generating-summary');
+    sessionStorage.setItem('conversationStage', 'generating-summary');
     
     // Generate summary
     setTimeout(() => {
       setStage('summary');
+      sessionStorage.setItem('conversationStage', 'summary');
     }, 2000);
   };
 
@@ -235,7 +297,10 @@ export default function ConversationPage() {
           {/* Actions */}
           <div className="flex gap-3">
             <button
-              onClick={() => setStage('problem-questions')}
+              onClick={() => {
+                setStage('problem-questions');
+                sessionStorage.setItem('conversationStage', 'problem-questions');
+              }}
               className="px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-lg font-medium hover:border-slate-400 transition-all"
             >
               Edit Answers
