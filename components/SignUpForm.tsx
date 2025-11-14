@@ -5,14 +5,15 @@ import { createClient } from "@/lib/supabase/client";
 
 interface SignUpFormProps {
   onSuccess: () => void;
+  defaultMode?: 'signup' | 'signin';
 }
 
-export default function SignUpForm({ onSuccess }: SignUpFormProps) {
+export default function SignUpForm({ onSuccess, defaultMode = 'signup' }: SignUpFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isSignUp, setIsSignUp] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(defaultMode === 'signup');
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();

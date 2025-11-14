@@ -151,6 +151,16 @@ export default function HomePage() {
           </form>
         </div>
       </div>
+
+      {/* Sign In Link */}
+      <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+        <button
+          onClick={() => router.push('/signin')}
+          className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+        >
+          Working on a current project? <span className="font-medium underline">Sign in here</span>
+        </button>
+      </div>
     </main>
   );
 }
