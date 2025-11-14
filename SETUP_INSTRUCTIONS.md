@@ -21,22 +21,18 @@ OPENAI_API_KEY=your-key-here
 4. **Enable Email Provider:**
    - Toggle "Enable Email provider" ON
    - Configure email templates if desired (optional)
-5. **Enable Google OAuth (Optional):**
-   - Toggle "Google" ON
-   - You'll need to create OAuth credentials in Google Cloud Console
-   - Add Client ID and Client Secret
-   - Add redirect URL: `http://localhost:3000/auth/callback` (for dev)
-6. **Enable Microsoft OAuth (Optional):**
-   - Toggle "Azure" ON
-   - Create app in Azure Portal
-   - Add Client ID and Client Secret
-   - Add redirect URL: `http://localhost:3000/auth/callback` (for dev)
-7. **Configure Redirect URLs:**
+5. **Email Confirmation (Optional for Testing):**
+   - Go to Authentication → Settings
+   - Toggle "Enable email confirmations" OFF if you want users to sign up without email confirmation (useful for testing)
+   - Leave it ON for production (recommended)
+6. **Configure Redirect URLs:**
    - Go to Authentication → URL Configuration
    - Add Site URL: `http://localhost:3000` (for dev)
    - Add Redirect URLs: `http://localhost:3000/auth/callback`
 
-**Note:** For production, you'll need to update these URLs to your production domain.
+**Note:** 
+- For production, you'll need to update these URLs to your production domain.
+- OAuth providers (Google/Microsoft) can be added later if needed - the code is ready but commented out.
 
 ## Getting OpenAI API Key
 
