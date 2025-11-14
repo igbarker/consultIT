@@ -177,8 +177,57 @@ export default function ConversationPage() {
         console.warn('No questions returned from API');
       }
       
-      setProblemQuestions(questions);
-      sessionStorage.setItem('problemQuestions', JSON.stringify(questions));
+      // Validate these are problem questions, not firmographic
+      const hasFirmographicIds = questions.some((q: any) => 
+        q.id === 'company_size' || q.id === 'budget' || q.id === 'team_size' || q.id === 'industry'
+      );
+      
+      if (hasFirmographicIds) {
+        console.error('ERROR: API returned firmographic questions instead of problem questions!');
+        // Use improved mock questions as fallback
+        const mockQuestions = [
+          {
+            id: "problem_scope",
+            question: `Help me understand the scope of this challenge. You mentioned "${problem.substring(0, 50)}..." - how long has this been an issue, and is it getting worse or staying the same?`,
+            context: "Understanding the timeline and trajectory helps us gauge urgency and identify what might have changed recently.",
+            type: "text",
+            required: true
+          },
+          {
+            id: "business_impact",
+            question: "When this problem occurs, what's the actual cost to your business? Are we talking about lost revenue, increased costs, team frustration, or customer complaints?",
+            context: "Quantifying the business impact helps us prioritize features and justify the investment in a solution.",
+            type: "text",
+            required: true
+          },
+          {
+            id: "current_approach",
+            question: "What are you doing today to address this? Walk me through your current process and help me understand where it's breaking down.",
+            context: "Knowing what you've already tried helps us avoid recommending similar solutions that won't solve the root cause.",
+            type: "text",
+            required: true
+          },
+          {
+            id: "success_vision",
+            question: "If we solve this perfectly, what would be different in 6 months? Paint me a picture of what success looks like.",
+            context: "Your vision of success helps us match you with solutions that align with your goals, not just check boxes.",
+            type: "text",
+            required: true
+          },
+          {
+            id: "constraints",
+            question: "What constraints are we working with? Budget, timeline, technical limitations, or team capabilities?",
+            context: "Understanding constraints upfront helps us recommend realistic solutions that you can actually implement.",
+            type: "text",
+            required: false
+          },
+        ];
+        setProblemQuestions(mockQuestions);
+        sessionStorage.setItem('problemQuestions', JSON.stringify(mockQuestions));
+      } else {
+        setProblemQuestions(questions);
+        sessionStorage.setItem('problemQuestions', JSON.stringify(questions));
+      }
       
       // Minimum 3 seconds on loading screen
       setTimeout(() => {
@@ -251,8 +300,27 @@ export default function ConversationPage() {
   if (stage === 'problem-questions') {
     // Ensure questions are loaded before showing QuestionFlow
     if (!problemQuestions || problemQuestions.length === 0) {
+      console.log('Problem questions not loaded yet, showing loading screen');
       return <LoadingScreen message="Loading questions..." />;
     }
+    
+    // Debug: Log what questions we're showing
+    console.log('Showing problem questions:', problemQuestions);
+    console.log('Current stage:', stage);
+    console.log('Firmographic questions:', firmographicQuestions);
+    
+    // Double-check we're showing problem questions, not firmographic
+    if (problemQuestions.some(q => q.id === 'company_size' || q.id === 'budget' || q.id === 'team_size')) {
+      console.error('ERROR: Firmographic questions detected in problemQuestions!');
+      // Clear and regenerate
+      sessionStorage.removeItem('problemQuestions');
+      sessionStorage.setItem('conversationStage', 'generating-questions');
+      if (initialProblem) {
+        generateQuestions(initialProblem);
+        return <LoadingScreen message="Regenerating questions..." />;
+      }
+    }
+    
     return <QuestionFlow questions={problemQuestions} onComplete={handleProblemQuestionsComplete} />;
   }
 
