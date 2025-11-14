@@ -23,7 +23,30 @@ export default function QuestionFlow({ questions, onComplete }: QuestionFlowProp
   const [currentAnswer, setCurrentAnswer] = useState("");
   const [showContext, setShowContext] = useState(false);
 
+  // Guard against empty questions array
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 p-4">
+        <div className="text-center">
+          <p className="text-slate-600">No questions available. Please try again.</p>
+        </div>
+      </div>
+    );
+  }
+
   const currentQuestion = questions[currentIndex];
+  
+  // Guard against invalid index
+  if (!currentQuestion) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 p-4">
+        <div className="text-center">
+          <p className="text-slate-600">Question not found. Please try again.</p>
+        </div>
+      </div>
+    );
+  }
+
   const progress = ((currentIndex + 1) / questions.length) * 100;
 
   const handleNext = () => {
