@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Mic, Paperclip, Sparkles } from "lucide-react";
 
 const ROTATING_WORDS = [
@@ -14,6 +15,7 @@ const ROTATING_WORDS = [
 ];
 
 export default function HomePage() {
+  const router = useRouter();
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -37,8 +39,9 @@ export default function HomePage() {
     e.preventDefault();
     if (!input.trim()) return;
     
-    // TODO: Route to conversation flow
-    console.log("Problem submitted:", input);
+    // Save problem to sessionStorage and navigate to conversation
+    sessionStorage.setItem('initialProblem', input);
+    router.push('/conversation');
   };
 
   const handleVoiceInput = () => {
@@ -81,8 +84,8 @@ export default function HomePage() {
             <div className="-mt-6">we'll help you solve it.</div>
           </h2>
 
-          <p className="text-sm text-slate-600 text-center mb-2 mx-auto whitespace-nowrap">
-            Our AI-powered platform will provide you with a one-stop shop to navigate all your company objectives
+          <p className="text-sm text-slate-600 text-center mb-8 mx-auto whitespace-nowrap">
+            Stop paying for overpriced consultants and see for yourself how we are reimagining internal projects
           </p>
 
           {/* Input Form */}
