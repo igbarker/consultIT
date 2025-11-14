@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import SignUpForm from "@/components/SignUpForm";
 
@@ -32,13 +33,16 @@ export default function SignInPage() {
           setIsAuthenticated(true);
           // Check if they have a project in progress
           const savedStage = sessionStorage.getItem('conversationStage');
-          if (savedStage && savedStage !== 'generating-questions') {
+          const savedProblem = sessionStorage.getItem('initialProblem');
+          
+          // Only redirect to conversation if they have an active project
+          if (savedStage && savedStage !== 'generating-questions' && savedProblem) {
             // Redirect to their conversation
             router.push('/conversation');
           } else {
-            // TODO: Redirect to dashboard/projects page when we build it
-            // For now, redirect to conversation to start new
-            router.push('/conversation');
+            // No active project - show message and option to start new
+            setCheckingAuth(false);
+            // Don't redirect - let them see they're signed in and can start new project
           }
         } else {
           setCheckingAuth(false);
@@ -84,8 +88,37 @@ export default function SignInPage() {
     );
   }
 
-  if (isAuthenticated) {
-    return null; // Will redirect
+  if (isAuthenticated && !checkingAuth) {
+    // User is authenticated but no active project
+    const savedStage = sessionStorage.getItem('conversationStage');
+    const savedProblem = sessionStorage.getItem('initialProblem');
+    
+    if (savedStage && savedStage !== 'generating-questions' && savedProblem) {
+      // Should have redirected, but just in case
+      return null;
+    }
+    
+    // Show message that they're signed in and can start new project
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 p-4">
+        <div className="w-full max-w-md text-center">
+          <div className="mb-8">
+            <h1 className="text-3xl font-semibold text-slate-900 mb-2">
+              You&apos;re signed in
+            </h1>
+            <p className="text-slate-600 mb-6">
+              You don&apos;t have any active projects. Start a new one to get started.
+            </p>
+            <Link
+              href="/"
+              className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-violet-700 transition-all shadow-lg"
+            >
+              Start New Project
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
