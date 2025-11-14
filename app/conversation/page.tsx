@@ -65,18 +65,24 @@ export default function ConversationPage() {
       }
     }
 
-    // Restore questions if they exist
-    if (savedProblemQuestions) {
-      try {
-        setProblemQuestions(JSON.parse(savedProblemQuestions));
-      } catch (e) {
-        console.error('Error parsing problem questions:', e);
+    // Only restore questions if we're past the generating stage
+    // If we're generating, always fetch fresh questions
+    if (savedStage && savedStage !== 'generating-questions') {
+      // Restore questions if they exist and we're continuing a session
+      if (savedProblemQuestions) {
+        try {
+          setProblemQuestions(JSON.parse(savedProblemQuestions));
+        } catch (e) {
+          console.error('Error parsing problem questions:', e);
+        }
       }
     }
 
-    // Only generate questions if we haven't started yet
+    // Only generate questions if we haven't started yet or are generating
     if (!savedStage || savedStage === 'generating-questions') {
       if (savedProblem) {
+        // Clear old questions to force fresh generation
+        sessionStorage.removeItem('problemQuestions');
         generateQuestions(savedProblem);
       } else {
         // No problem saved - redirect to home
@@ -154,6 +160,7 @@ export default function ConversationPage() {
 
   const generateQuestions = async (problem: string) => {
     try {
+      console.log('Generating questions for problem:', problem);
       const response = await fetch('/api/conversation/generate-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -161,7 +168,15 @@ export default function ConversationPage() {
       });
 
       const data = await response.json();
+      console.log('Questions API response:', data);
+      
       const questions = data.questions || [];
+      console.log('Parsed questions:', questions);
+      
+      if (questions.length === 0) {
+        console.warn('No questions returned from API');
+      }
+      
       setProblemQuestions(questions);
       sessionStorage.setItem('problemQuestions', JSON.stringify(questions));
       
