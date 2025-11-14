@@ -24,41 +24,70 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "system",
-          content: `You are an expert business consultant conducting a discovery interview. Generate 5-7 conversational, contextual questions to deeply understand the user's specific problem.
+          content: `You are an expert business consultant conducting a discovery interview. Your job is to ask insightful, consultative questions that demonstrate you've actually read and understood the user's specific problem.
 
-Rules:
-1. Questions must be directly related to THEIR specific problem (don't ask generic company demographics)
-2. Ask like a consultant who actually read their input
-3. Focus on: problem scope, impact, current state, what they've tried, what success looks like
-4. Be conversational but professional
-5. Each question should have a clear "why we're asking" explanation
-6. Mix of open-ended (text) and some binary (yes/no) questions
-7. Keep questions focused on understanding the PROBLEM, not the company
+CRITICAL RULES:
+1. Reference specific details from their problem statement - show you're listening
+2. Ask questions that a $500/hour consultant would ask - deep, strategic, not surface-level
+3. Focus on understanding: problem scope/trends, business impact, current processes, what they've tried, constraints, success criteria
+4. Be conversational and professional - like talking to a colleague, not filling out a form
+5. Each question must have a clear "context" explaining why it matters
+6. Mix question types: mostly text (open-ended), some yes/no for quick validation
+7. DO NOT ask generic company demographics (we'll ask those separately later)
+8. Make questions feel personalized to THEIR specific situation
 
-Return as JSON array:
+Example of GOOD consultative question:
+"You mentioned [specific detail from their problem]. Help me understand - is this a recent trend or has it been building over time? And when [specific impact] happens, what's the actual cost to your business?"
+
+Example of BAD question (too generic):
+"How many employees are in your company?"
+
+Return ONLY a valid JSON array with this exact structure:
 [
   {
-    "id": "unique_id",
-    "question": "The conversational question text",
-    "context": "Why we're asking this - how it helps find the right solution",
+    "id": "unique_snake_case_id",
+    "question": "The conversational, consultative question that references their specific problem",
+    "context": "Why this question matters - how it helps us find the right solution",
     "type": "text" | "yesno",
-    "required": true | false
+    "required": true
   }
-]`
+]
+
+Generate 5-7 questions.`
         },
         {
           role: "user",
-          content: `User's problem: "${problem}"\n\nGenerate 5-7 contextual questions to understand their specific situation.`
+          content: `User's problem: "${problem}"\n\nGenerate consultative questions that show you understand their specific situation. Reference details from their problem.`
         }
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
+      temperature: 0.8,
     });
 
     const response = completion.choices[0].message.content;
-    const data = JSON.parse(response || '{}');
+    
+    // Parse the response - it should be a JSON array
+    let questions = [];
+    try {
+      // Try parsing as array directly
+      questions = JSON.parse(response || '[]');
+      
+      // If it's wrapped in an object with "questions" key, extract it
+      if (questions && typeof questions === 'object' && !Array.isArray(questions)) {
+        questions = questions.questions || questions.data || [];
+      }
+      
+      // Ensure it's an array
+      if (!Array.isArray(questions)) {
+        throw new Error('Response is not an array');
+      }
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      console.error('Response was:', response);
+      // Fallback to mock questions
+      questions = generateMockQuestions(problem);
+    }
 
-    return NextResponse.json(data);
+    return NextResponse.json({ questions });
   } catch (error) {
     console.error('Error generating questions:', error);
     return NextResponse.json(
