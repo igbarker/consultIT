@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import SignUpForm from "@/components/SignUpForm";
@@ -9,8 +9,13 @@ export default function SignInPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const hasCheckedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent double-checking
+    if (hasCheckedRef.current) return;
+    hasCheckedRef.current = true;
+
     // Check if already authenticated
     const checkAuth = async () => {
       try {
@@ -46,11 +51,9 @@ export default function SignInPage() {
 
     // Add timeout to prevent infinite loading
     const timeout = setTimeout(() => {
-      if (checkingAuth) {
-        console.warn('Auth check timed out');
-        setCheckingAuth(false);
-      }
-    }, 3000);
+      console.warn('Auth check timed out - showing sign-in form');
+      setCheckingAuth(false);
+    }, 2000);
 
     checkAuth();
 
