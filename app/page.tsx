@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mic, Paperclip, Sparkles } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { Mic, Paperclip, Sparkles, LogOut } from "lucide-react";
 
 const ROTATING_WORDS = [
   "challenge",
@@ -22,8 +23,18 @@ export default function HomePage() {
   const [isFocused, setIsFocused] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    // Check if user is authenticated
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    };
+
+    checkAuth();
+
     const interval = setInterval(() => {
       setIsAnimating(true);
       
@@ -35,6 +46,17 @@ export default function HomePage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    
+    // Clear all sessionStorage
+    sessionStorage.clear();
+    
+    // Refresh the page
+    window.location.href = '/';
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +82,20 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Logout Button - Top Right */}
+      {isAuthenticated && (
+        <div className="fixed top-4 right-4 z-50">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:text-slate-900 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200 hover:border-slate-300 transition-all shadow-sm"
+            title="Sign out"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Sign out</span>
+          </button>
+        </div>
+      )}
+
       <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 p-4 relative overflow-hidden">
         {/* Ambient Background Elements */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
