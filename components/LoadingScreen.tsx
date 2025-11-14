@@ -27,7 +27,7 @@ const FUN_FACTS = [
 
 export default function LoadingScreen({ message }: LoadingScreenProps) {
   const [messageIndex, setMessageIndex] = useState(0);
-  const [factIndex, setFactIndex] = useState(0);
+  const [factIndex, setFactIndex] = useState(() => Math.floor(Math.random() * FUN_FACTS.length));
 
   const messages = message ? [message] : DEFAULT_MESSAGES;
 
